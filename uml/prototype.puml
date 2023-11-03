@@ -1,0 +1,72 @@
+@startuml
+
+participant User
+participant Controller
+
+box App #APPLICATION
+    participant Controller
+    participant App_Service
+end box
+
+box Domain #LightYellow
+    participant Gallery
+    participant Recognizer
+    participant Indexer
+end box
+
+' Сбор фотографий
+User -> Controller: recognizeAllFaces
+Controller -> App_Service: findPhotoList
+App_Service -> Gallery: findPhotoList
+App_Service <-- Gallery: PhotoList
+Controller <-- App_Service: PhotoList
+
+' Распознование всех лиц
+Controller -> App_Service: detectAllFaces(PhotoList)
+loop Photo in PhotoList
+    App_Service -> Recognizer: getFacesFromPhoto
+    App_Service <-- Recognizer: FaceList
+
+    App_Service -> Gallery: saveFace
+    App_Service <-- Gallery: Face
+
+    App_Service -> Indexer: addPhotoToFace(Photo, Face)
+end
+note right
+    После получения списка и индексации
+    будет доступен индекс:
+    - face1
+    --- photo1.jpg
+    --- photo2.jpg 
+    - face2
+    --- photo1.jpg
+    --- photo200.jpg
+end note
+Controller <-- App_Service: void
+
+' Группировка лиц
+User -> Controller: groupFaces
+Controller -> App_Service: getAllDetectedFaceList
+App_Service -> Indexer: getAllFaceList
+App_Service <-- Indexer: FaceList
+Controller <-- App_Service:: FaceList
+loop Face in FaceList
+    Controller -> App_Service: detectPhotoListWithSimilarFace(Face)
+    App_Service -> Gallery: getFace(Face)
+    App_Service <-- Gallery: FaceList
+
+    App_Service -> Recognizer: findSimilarFaces(FacesList)
+    App_Service <-- Recognizer: SimilarFaceList
+
+    loop SimilarFace in SimilarFaceList
+        App_Service -> Indexer: getFacePhotoList(SimilarFace)
+        App_Service <-- Indexer: PhotoList
+
+        loop for SimilarFacePhone in PhotoList
+            App_Service -> Indexer: addPhotoToFace(Photo, Face)
+        end
+    end
+    Controller <-- App_Service: void
+end
+
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+
+participant User
+participant Controller
+
+box App #APPLICATION
+    participant Controller
+end box
+
+box Domain #LightYellow
+    participant Gallery
+    participant GalleryRepositoryInterface
+end box
+
+box Infrastructure #snow
+    participant YandexDiskGalleryRepository
+end box
+
+User -> Controller: recognizeAllFaces
+Controller -> Gallery: findPhotoList
+
+Gallery -> GalleryRepositoryInterface: findPhotoList
+
+GalleryRepositoryInterface -> YandexDiskGalleryRepository: findPhotoList
+GalleryRepositoryInterface <-- YandexDiskGalleryRepository: PhotoList
+
+Gallery <-- GalleryRepositoryInterface: PhotoList 
+
+
+Controller <-- Gallery: PhotoList
+
+@enduml
