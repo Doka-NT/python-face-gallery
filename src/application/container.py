@@ -1,9 +1,9 @@
 from dependency_injector import containers, providers
 
-from .application.service import AppService
-from .domain.gallery import Gallery
-from .infrastructure.gallery import FileSystemFileScanner
-from .infrastructure.logger import logger
+from .service import AppService
+from ..domain.gallery import Gallery
+from ..infrastructure.gallery import FileSystemFileScanner
+from ..infrastructure.logger import logger
 
 
 class Container(containers.DeclarativeContainer):

@@ -3,7 +3,7 @@ from pprint import pprint
 from dependency_injector.wiring import inject, Provide
 
 from .service import AppService
-from ..container import Container
+from .container import Container
 
 @inject
 def main(

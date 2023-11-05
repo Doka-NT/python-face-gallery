@@ -1,5 +1,5 @@
 import os
-from src.container import Container
+from src.application.container import Container
 from src.application.controller import main
 
 if __name__ == "__main__":
