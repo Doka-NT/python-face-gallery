@@ -9,6 +9,10 @@
             "type": "python",
             "request": "launch",
             "program": "app.py",
+            "args": [
+                "--cpus",
+                "4"
+            ],
             "console": "integratedTerminal",
             "justMyCode": true
         }

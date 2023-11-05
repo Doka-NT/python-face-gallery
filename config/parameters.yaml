@@ -1,1 +1,3 @@
 gallery_path: '.'
+output_dir: './output' 
+face_dir: 'faces'

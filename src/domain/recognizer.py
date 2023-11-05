@@ -1,7 +1,11 @@
 from .value_object import Face, Photo
 
-def get_face_list_from_photo(photo:Photo):
-    pass
+class RecognizerInterface:
+    def __init__(self) -> None:
+        pass
 
-def find_similar_face_list(face_list:list[Photo]) -> list[Face]:
-    pass
+    def get_face_list_from_photo(self, photo:Photo):
+        pass
+
+    def find_similar_face_list(self, face_list:list[Photo]) -> list[Face]:
+        pass

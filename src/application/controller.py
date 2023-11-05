@@ -1,5 +1,4 @@
 from logging import Logger
-from pprint import pprint
 from dependency_injector.wiring import inject, Provide
 
 from .service import AppService
@@ -13,8 +12,6 @@ def main(
 
     logger.info("Запуск сканирования списка фотографий")
     photo_list = app_service.find_photo_list()
-
-    pprint(photo_list)
 
     logger.info("Запуск распознавания лиц")
     app_service.detect_all_faces(photo_list)
