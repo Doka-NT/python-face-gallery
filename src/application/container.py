@@ -1,39 +1,82 @@
 import os
+import sqlite3
 from dependency_injector import containers, providers
+from src.infrastructure.indexer import DatabaseIndexerRepository
 
 from src.infrastructure.recognizer import FaceRecognitionRecognizer
 from .service import AppService
 from ..domain.gallery import Gallery
-from ..domain.recognizer import RecognizerInterface
-from ..infrastructure.gallery import FileSystemFileScanner
+from ..domain.indexer import Indexer
+from ..infrastructure.gallery import (
+    FaceFileStorage,
+    FaceRepository,
+    FileSystemFileScanner,
+    PhotoRepository,
+)
 from ..infrastructure.logger import logger
 
 
 class Container(containers.DeclarativeContainer):
     __self__ = providers.Self()
 
-    parameters_file = os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, 'config', 'parameters.yaml')
+    parameters_file = os.path.join(
+        os.path.dirname(__file__),
+        os.path.pardir,
+        os.path.pardir,
+        "config",
+        "parameters.yaml",
+    )
 
     config = providers.Configuration(yaml_files=[parameters_file])
 
-    logger = providers.Factory(
-        lambda: logger
+    logger = providers.Factory(lambda: logger)
+
+    db_connection = providers.Factory(
+        lambda db_path: sqlite3.connect(db_path),
+        config.db_path,
     )
 
     domain_gallery_file_scanner = providers.Factory(
-        FileSystemFileScanner,
-        config.gallery_path
+        FileSystemFileScanner, config.gallery_path
+    )
+
+    domain_face_file_storage = providers.Factory(
+        FaceFileStorage,
+        config.output_dir,
+        config.face_dir,
+    )
+
+    domain_face_repository = providers.Factory(
+        FaceRepository,
+        db_connection = db_connection,
+    )
+
+    domain_photo_repository = providers.Factory(
+        PhotoRepository,
+        db_connection = db_connection,
     )
 
     domain_gallery = providers.Factory(
         Gallery,
-        domain_gallery_file_scanner
+        domain_gallery_file_scanner,
+        domain_face_file_storage,
+        domain_face_repository,
+        domain_photo_repository,
     )
 
     domain_recognizer = providers.Factory(
         FaceRecognitionRecognizer,
-        output_dir=config.output_dir,
         face_dir=config.face_dir,
+    )
+
+    domain_indexer_repository = providers.Factory(
+        DatabaseIndexerRepository,
+        db_connection = db_connection,
+    )
+
+    domain_indexer = providers.Factory(
+        Indexer,
+        domain_indexer_repository
     )
 
     app_service = providers.Factory(
@@ -41,5 +84,6 @@ class Container(containers.DeclarativeContainer):
         file_scanner=domain_gallery_file_scanner,
         gallery=domain_gallery,
         recognizer=domain_recognizer,
+        indexer=domain_indexer,
         logger=logger,
-    )    
+    )

@@ -1,5 +1,14 @@
 {
     "python.analysis.extraPaths": [
         "./src/domain"
-    ]
+    ],
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "yandex-disk-faces",
+            "database": "${workspaceFolder:yandex-disk-faces}/.runtime/output/database.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
 }
