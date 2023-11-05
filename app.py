@@ -1,11 +1,11 @@
 import os
-
+from src.container import Container
 from src.application.controller import main
-from src.infrastructure.logger import logger
-from src.infrastructure.gallery import FileSystemFileScanner
 
 if __name__ == "__main__":
-    main(
-        logger,
-        FileSystemFileScanner(os.path.join(os.path.dirname(__file__), '.runtime', 'input-photos'))
-    )
+    container = Container()
+    container.config.set('gallery_path', os.path.join(os.path.dirname(__file__), '.runtime', 'input-photos'))
+    container.init_resources()
+    container.wire(packages=[__name__, 'src'], from_package='.')
+
+    main()

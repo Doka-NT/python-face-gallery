@@ -1,16 +1,19 @@
 from ..domain.gallery import FileScannerInterface, Gallery
+from ..domain.value_object import Photo
 
+class AppService:
+    def __init__(self, file_scanner: FileScannerInterface, gallery: Gallery):
+        self.file_scanner = file_scanner
+        self.gallery = gallery
 
-def find_photo_list(file_scanner:FileScannerInterface) -> list:
-    gallery = Gallery()
+    def find_photo_list(self) -> list[Photo]:
+        return self.gallery.find_photo_list()
 
-    return gallery.find_photo_list(file_scanner)
+    def detect_all_faces(self, photo_list: list[Photo]):
+        pass
 
-def detect_all_faces(photo_list):
-    pass
+    def get_all_detected_faces(self) -> list:
+        return []
 
-def get_all_detected_faces() -> list:
-    return []
-
-def detect_photo_list_with_similar_face(face):
-    pass
+    def detect_photo_list_with_similar_face(self, face):
+        pass
