@@ -1,3 +1,4 @@
+import hashlib
 import os
 from pprint import pprint
 from PIL import Image
@@ -14,8 +15,9 @@ class FaceRecognitionRecognizer(RecognizerInterface):
         self.__create_face_dir_if_not_exists()
 
     def get_face_list_from_photo(self, photo:Photo):
+        face_prefix = hashlib.md5(photo.file_path.encode('utf-8')).hexdigest()
+
         image = face_recognition.load_image_file(photo.file_path)
-        pil_image = Image.fromarray(image)
         face_locations = face_recognition.face_locations(image)
 
         face_list = []
@@ -25,7 +27,7 @@ class FaceRecognitionRecognizer(RecognizerInterface):
             face_image = image[top:bottom, left:right]
             face_image = Image.fromarray(face_image)
 
-            face_file_path = os.path.join(self.__get_face_dir(), f"{index}.jpg")
+            face_file_path = os.path.join(self.__get_face_dir(), f"{face_prefix}-{index}.jpg")
             face_image.save(face_file_path)
 
             face_list.append(
