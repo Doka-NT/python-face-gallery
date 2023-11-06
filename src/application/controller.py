@@ -21,12 +21,19 @@ def main(
     logger.info("Запуск распознавания лиц")
     app_service.detect_all_faces(photo_entity_list)
 
-    logger.info("Получение списка всех распознанных лиц")
+    logger.info("Удаление фотографий без лиц из БД")
+    app_service.delete_photo_without_face()
+
+    logger.info(f"Получение списка всех распознанных лиц")
     detected_face_list = app_service.get_all_detected_faces()
+    logger.info(f"Распознанных лиц: {len(detected_face_list)}")
 
     logger.info("Запуск поиска похожих лиц и группировка фотографий")
     for face in detected_face_list:
-        app_service.detect_photo_list_with_similar_face(face)
+        app_service.detect_photo_list_with_similar_face(face, detected_face_list)
+
+    logger.info("Формирование фотоальбома")
+    app_service.create_album()
 
 
 @inject

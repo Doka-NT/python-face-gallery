@@ -11,7 +11,9 @@ from ..infrastructure.gallery import (
     FaceFileStorage,
     FaceRepository,
     FileSystemFileScanner,
+    FileSystemGalleryStorage,
     PhotoRepository,
+    SimilarFaceRepository,
 )
 from ..infrastructure.logger import logger
 
@@ -48,12 +50,23 @@ class Container(containers.DeclarativeContainer):
 
     domain_face_repository = providers.Factory(
         FaceRepository,
-        db_connection = db_connection,
+        db_connection=db_connection,
     )
 
     domain_photo_repository = providers.Factory(
         PhotoRepository,
-        db_connection = db_connection,
+        db_connection=db_connection,
+    )
+
+    domain_similar_face_repository = providers.Factory(
+        SimilarFaceRepository,
+        db_connection=db_connection,
+    )
+
+    domain_gallery_storage = providers.Factory(
+        FileSystemGalleryStorage,
+        config.output_dir,
+        config.album_dir,
     )
 
     domain_gallery = providers.Factory(
@@ -62,6 +75,8 @@ class Container(containers.DeclarativeContainer):
         domain_face_file_storage,
         domain_face_repository,
         domain_photo_repository,
+        domain_similar_face_repository,
+        domain_gallery_storage,
     )
 
     domain_recognizer = providers.Factory(
@@ -71,13 +86,10 @@ class Container(containers.DeclarativeContainer):
 
     domain_indexer_repository = providers.Factory(
         DatabaseIndexerRepository,
-        db_connection = db_connection,
+        db_connection=db_connection,
     )
 
-    domain_indexer = providers.Factory(
-        Indexer,
-        domain_indexer_repository
-    )
+    domain_indexer = providers.Factory(Indexer, domain_indexer_repository)
 
     app_service = providers.Factory(
         AppService,

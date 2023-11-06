@@ -9,10 +9,13 @@ from ..domain.gallery import (
     FaceFileStorageInterface,
     FileScannerInterface,
     FaceRepositoryInterface,
+    GalleryStorageInterface,
     PhotoRepositoryInterface,
+    SimilarFaceRepositoryInterface,
 )
 from ..domain.value_object import Photo
 from dependency_injector.wiring import Provide, _is_marker
+
 
 class FileSystemFileScanner(FileScannerInterface):
     def __init__(self, path: str) -> None:
@@ -24,7 +27,7 @@ class FileSystemFileScanner(FileScannerInterface):
         for root, dirs, files in os.walk(self.path):
             for file in files:
                 # Проверка наличия расширения файла .jpg или .jpeg
-                if file.endswith(".jpg") or file.endswith(".jpeg"):
+                if file.lower().endswith(".jpg") or file.lower().endswith(".jpeg"):
                     photo_list.append(self.__create_photo(os.path.join(root, file)))
         return photo_list
 
@@ -39,10 +42,24 @@ class FaceFileStorage(FaceFileStorageInterface):
         self.face_dir = face_dir
 
     def save(self, face: Face, face_file_path: str) -> None:
-        file_name = f"{face.id}.jpg"
-        file_path = os.path.join(self.output_dir, self.face_dir, file_name)
+        file_path = self.get_face_path(face)
 
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         shutil.copyfile(face_file_path, file_path)
+
+    def get_face(self, face_path: str) -> Face:
+        id = os.path.basename(face_path).replace(".jpg", "")
+
+        return Face(id=id)
+
+    def get_face_path(self, face: Face) -> str:
+        return os.path.join(self.__get_face_dir(), self.__get_face_filename(face))
+
+    def __get_face_filename(self, face: Face) -> str:
+        return f"{face.id}.jpg"
+
+    def __get_face_dir(self) -> str:
+        return os.path.join(self.output_dir, self.face_dir)
 
 
 class FaceRepository(FaceRepositoryInterface):
@@ -81,6 +98,10 @@ class FaceRepository(FaceRepositoryInterface):
             )
         self.db_connection.commit()
 
+    def find_by_id_list(self, id_list: list[str]) -> list[Face]:
+        return [Face(id=id) for id in id_list]
+
+
 class PhotoRepository(PhotoRepositoryInterface):
     def __init__(self, db_connection: Connection) -> None:
         self.db_connection = db_connection
@@ -117,3 +138,71 @@ class PhotoRepository(PhotoRepositoryInterface):
                 },
             )
         self.db_connection.commit()
+
+
+class SimilarFaceRepository(SimilarFaceRepositoryInterface):
+    def __init__(self, db_connection: Connection) -> None:
+        self.db_connection = db_connection
+
+    def save(self, face: Face, similar_face_list: list[Face]) -> None:
+        cursor = self.db_connection.cursor()
+
+        for similar_face in similar_face_list:
+            cursor.execute(
+                """
+                INSERT INTO similar_face (face_id, similar_face_id)
+                VALUES (:face_id, :similar_face_id)
+                """,
+                {
+                    "face_id": face.id,
+                    "similar_face_id": similar_face.id,
+                },
+            )
+        self.db_connection.commit()
+
+    def is_related(self, face: Face, similar_face: Face) -> bool:
+        cursor = self.db_connection.cursor()
+
+        row = cursor.execute(
+            """
+                SELECT * FROM similar_face
+                WHERE 
+                    (face_id = :face_id AND similar_face_id = :similar_face_id)
+                    OR (similar_face_id = :face_id AND face_id = :similar_face_id)
+            """,
+            {"face_id": face.id, "similar_face_id": similar_face.id},
+        ).fetchone()
+
+        return row is not None
+
+    def find_face_id_list_by_face_id(self, face_id: str) -> list[str]:
+        cursor = self.db_connection.cursor()
+
+        rows = cursor.execute(
+            """
+                SELECT similar_face_id FROM similar_face
+                WHERE face_id = :face_id
+            """,
+            {"face_id": face_id},
+        ).fetchall()
+
+        return [row[0] for row in rows]
+
+
+class FileSystemGalleryStorage(GalleryStorageInterface):
+    def __init__(self, output_dir: str, album_dir: str) -> None:
+        super().__init__()
+        self.output_dir = output_dir
+        self.album_dir = album_dir
+
+    def create_album(self, name: str) -> None:
+        album_path = self.__get_album_path(name)
+        os.makedirs(album_path, exist_ok=True)
+
+    def add_photo_to_album(self, name: str, photo_path: str) -> None:
+        album_path = self.__get_album_path(name)
+        target_file_path = os.path.join(album_path, os.path.basename(photo_path))
+        shutil.copyfile(photo_path, target_file_path)
+
+    def __get_album_path(self, name: str) -> str:
+        return os.path.join(self.output_dir, self.album_dir, name)

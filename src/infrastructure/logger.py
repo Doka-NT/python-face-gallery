@@ -9,9 +9,9 @@ handlers = [
 ]
 
 logging.basicConfig(
-    level=logging.INFO, 
-    format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
-    handlers=handlers
+    level=logging.INFO,
+    format="[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
+    handlers=handlers,
 )
 
-logger = logging.getLogger('App')
+logger = logging.getLogger("App")

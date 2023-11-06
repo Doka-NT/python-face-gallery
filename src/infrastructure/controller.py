@@ -3,6 +3,10 @@ import sqlite3
 
 def init_database(db_connection: sqlite3.Connection):
     sql_list = [
+        "DROP TABLE IF EXISTS face",
+        "DROP TABLE IF EXISTS face_photo",
+        "DROP TABLE IF EXISTS photo",
+        "DROP TABLE IF EXISTS similar_face",
         """
             CREATE TABLE IF NOT EXISTS photo (
                 id STRING PRIMARY KEY,
@@ -19,6 +23,12 @@ def init_database(db_connection: sqlite3.Connection):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 face_id INTEGER,
                 photo_id STRING
+            )
+        """,
+        """
+            CREATE TABLE IF NOT EXISTS similar_face (
+                face_id STRING,
+                similar_face_id STRING
             )
         """,
     ]
