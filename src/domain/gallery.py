@@ -119,5 +119,9 @@ class Gallery:
     def add_photo_list_to_album(
         self, face: Face, photo_list: list[PhotoEntity]
     ) -> None:
+        processed_path_list = []
         for photo in photo_list:
+            if photo.file_path in processed_path_list:
+                continue
             self.gallery_storage.add_photo_to_album(face.id, photo.file_path)
+            processed_path_list.append(photo.file_path)
