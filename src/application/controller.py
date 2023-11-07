@@ -4,7 +4,7 @@ from dependency_injector.wiring import inject, Provide
 
 from .service import AppService
 from .container import Container
-from ..infrastructure.controller import init_database as infrastructure_init_database
+from ..infrastructure.database import create_database, drop_database
 
 
 @inject
@@ -38,4 +38,5 @@ def main(
 
 @inject
 def init_database(db_connection: Connection = Provide[Container.db_connection]):
-    infrastructure_init_database(db_connection)
+    drop_database(db_connection)
+    create_database(db_connection)

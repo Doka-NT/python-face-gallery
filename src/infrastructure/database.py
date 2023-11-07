@@ -1,12 +1,8 @@
 import sqlite3
 
 
-def init_database(db_connection: sqlite3.Connection):
+def create_database(db_connection: sqlite3.Connection):
     sql_list = [
-        "DROP TABLE IF EXISTS face",
-        "DROP TABLE IF EXISTS face_photo",
-        "DROP TABLE IF EXISTS photo",
-        "DROP TABLE IF EXISTS similar_face",
         """
             CREATE TABLE IF NOT EXISTS photo (
                 id STRING PRIMARY KEY,
@@ -31,6 +27,20 @@ def init_database(db_connection: sqlite3.Connection):
                 similar_face_id STRING
             )
         """,
+    ]
+
+    cursor = db_connection.cursor()
+
+    for sql in sql_list:
+        cursor.execute(sql)
+
+
+def drop_database(db_connection: sqlite3.Connection):
+    sql_list = [
+        "DROP TABLE IF EXISTS face",
+        "DROP TABLE IF EXISTS face_photo",
+        "DROP TABLE IF EXISTS photo",
+        "DROP TABLE IF EXISTS similar_face",
     ]
 
     cursor = db_connection.cursor()
