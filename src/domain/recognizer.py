@@ -1,5 +1,4 @@
-from .entity import Face
-from .value_object import Photo
+from .entity import Face, Photo
 
 
 class RecognizerInterface:
@@ -7,9 +6,9 @@ class RecognizerInterface:
         pass
 
     def get_face_list_from_photo(self, photo: Photo) -> list[str]:
-        pass
+        raise Exception('Not implemented')
 
     def find_similar_face_list(
         self, face_file_path, face_list_path_list: list[str]
     ) -> list[str]:
-        pass
+        raise Exception('Not implemented')

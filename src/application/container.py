@@ -19,8 +19,6 @@ from ..infrastructure.logger import logger
 
 
 class Container(containers.DeclarativeContainer):
-    __self__ = providers.Self()
-
     parameters_file = os.path.join(
         os.path.dirname(__file__),
         os.path.pardir,

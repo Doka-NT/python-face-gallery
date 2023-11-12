@@ -47,7 +47,7 @@ class AppService:
 
         return photo_entity_list
 
-    def get_all_detected_faces(self) -> list:
+    def get_all_detected_faces(self) -> list[Face]:
         return self.indexer.get_face_list()
 
     def detect_photo_list_with_similar_face(
